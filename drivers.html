@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Formula 1 championship legends, live driver standings and featured driver profiles.">
+    <title>Formula 1 | Drivers</title>
+    <!-- Credits: F1 Educational Portal | Developers: Anuar Tursynbekov & Zhanaiym Sadyk | Astana IT University | 2026 -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23ff1801'/%3E%3Cpath d='M14 46V18h24v7H22v4h14v7H22v10z' fill='white'/%3E%3C/svg%3E">
+    <script>
+        /* Apply the saved theme before first paint so the page never flashes the wrong colours. */
+        (function () {
+            try {
+                document.documentElement.setAttribute("data-bs-theme", localStorage.getItem("f1-theme") === "light" ? "light" : "dark");
+            } catch (e) { /* storage blocked: keep the default dark theme */ }
+        })();
+    </script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- jQuery (CDN) first; our scripts are deferred so the DOM is parsed before they run -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="js/i18n.js" defer></script>
+    <script src="js/script.js" defer></script>
+    <script src="js/auth.js" defer></script>
+    <script src="js/api.js" defer></script>
+</head>
+<body data-page="drivers">
+
+<a class="skip-link visually-hidden-focusable" href="#content" data-i18n="a11y.skip">Skip to main content</a>
+
+<!-- Scroll progress bar -->
+<div id="scroll-progress-container" aria-hidden="true">
+    <div id="scroll-progress"></div>
+</div>
+
+<!-- Toast notifications -->
+<div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3" role="status" aria-live="polite"></div>
+
+<header id="site-header">
+    <!-- Bootstrap navbar: collapses into a hamburger menu below the xl breakpoint -->
+    <nav id="main-nav" class="navbar navbar-expand-xl navbar-dark bg-dark px-3 px-md-4 border-bottom border-2 border-danger" data-bs-theme="dark" aria-label="Main navigation">
+        <div class="container-fluid">
+            <a class="logo navbar-brand" href="index.html">F1 PORTAL</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav nav-menu ms-auto align-items-xl-center gap-xl-1">
+                    <li class="nav-item"><a class="nav-link" href="index.html" data-i18n="nav.home">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="teams.html" data-i18n="nav.teams">Teams</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="drivers.html" aria-current="page" data-i18n="nav.drivers">Drivers</a></li>
+                    <li class="nav-item"><a class="nav-link" href="races.html" data-i18n="nav.races">Races</a></li>
+                    <li class="nav-item"><a class="nav-link" href="gallery.html" data-i18n="nav.gallery">Gallery</a></li>
+                    <li class="nav-item"><a class="nav-link" href="about.html" data-i18n="nav.about">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="contact.html" data-i18n="nav.contact">Contact</a></li>
+                    <li class="nav-item nav-auth" id="nav-auth">
+                        <a class="btn btn-outline-light btn-sm" href="login.html" data-i18n="nav.login">Log in</a>
+                        <a class="btn btn-danger btn-sm" href="signup.html" data-i18n="nav.signup">Sign up</a>
+                    </li>
+                    <li class="nav-item">
+                        <label for="lang-select" class="visually-hidden">Language</label>
+                        <select id="lang-select" class="form-select form-select-sm lang-select">
+                            <option value="en">EN</option>
+                            <option value="ru">RU</option>
+                            <option value="kk">KZ</option>
+                        </select>
+                    </li>
+                    <li class="nav-item">
+                        <button id="bg-color-btn" type="button" class="btn btn-outline-secondary btn-sm btn-spin" title="Change background colour" data-i18n-title="bg.title" aria-label="Change background colour" data-i18n-aria="bg.title">🎨</button>
+                    </li>
+                    <li class="nav-item">
+                        <div class="form-check form-switch theme-switch mb-0">
+                            <input class="form-check-input" type="checkbox" role="switch" id="theme-switch" aria-label="Dark mode" data-i18n-aria="theme.aria">
+                            <label class="form-check-label" for="theme-switch"><span id="theme-icon" aria-hidden="true">🌙</span> <span id="theme-text">Night</span></label>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<!-- CSS Grid page layout: header / sidebar / main / footer (see .page-grid in style.css) -->
+<div class="page-grid">
+
+    <header id="main-header" class="text-center py-4 px-3">
+        <h1 class="highlightable" data-i18n="drivers.title">Top Championship Drivers</h1>
+        <div class="mt-3">
+            <button id="open-popup-btn" type="button" class="btn btn-danger btn-sm fw-bold btn-pulse" data-i18n="btn.subscribe">Quick Subscribe</button>
+        </div>
+    </header>
+
+    <aside id="sidebar" class="sidebar px-3 ps-lg-0 pe-lg-0" aria-label="Sidebar">
+        <section class="side-card p-3 mb-3 rounded border">
+            <h2 class="side-title" data-i18n="side.next">Next Race</h2>
+            <div id="next-race" class="api-box small" aria-live="polite"></div>
+        </section>
+        <section class="side-card p-3 mb-3 rounded border">
+            <h2 class="side-title" data-i18n="side.fav">My Favourite Drivers</h2>
+            <ul id="fav-list" class="list-unstyled mb-0"></ul>
+        </section>
+        <section class="side-card p-3 mb-3 rounded border">
+            <h2 class="side-title" data-i18n="side.recent">Recent Searches</h2>
+            <div id="recent-searches" class="d-flex flex-wrap gap-2"></div>
+            <button id="clear-recent" type="button" class="btn btn-outline-secondary btn-sm mt-2" data-i18n="side.clear" hidden>Clear</button>
+        </section>
+    </aside>
+
+    <main id="content" tabindex="-1" class="p-3 p-md-4 px-sm-3">
+    <section class="mb-4" aria-label="Search">
+        <div class="position-relative">
+            <label for="global-search-input" class="visually-hidden">Search</label>
+            <input type="text" id="global-search-input" class="form-control" placeholder="🔍 Search driver names, titles..." data-i18n-placeholder="search.drivers" autocomplete="off">
+            <ul id="autocomplete-list" class="dropdown-menu w-100"></ul>
+        </div>
+        <p id="no-results" class="text-center fw-bold mt-3 mb-0" hidden></p>
+    </section>
+
+    <section class="mb-4 mb-lg-5">
+        <h2 data-i18n="grid.title">The Grid</h2>
+        <figure class="fans-banner">
+            <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="images/drivers-group-abu-dhabi.jpg" width="738" height="405" class="lazy-load  zoomable" alt="All drivers of the season posing together on the track" data-gallery="single-grid" data-full="images/drivers-group-abu-dhabi.jpg" tabindex="0" role="button" data-caption-key="cap.grid">
+            <figcaption class="caption-bar" data-i18n="cap.grid">Season finale grid photo, Abu Dhabi Grand Prix 2023</figcaption>
+        </figure>
+    </section>
+
+    <section class="mb-4 mb-lg-5">
+        <h2 data-i18n="live.drivers">Live Driver Standings</h2>
+        <div id="driver-standings" class="api-box" aria-live="polite"></div>
+    </section>
+
+    <section class="mb-4 mb-lg-5 trophy-section">
+        <figure class="trophy-figure">
+            <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="images/trophy.jpg" width="494" height="619" class="lazy-load  zoomable" alt="The Formula 1 World Championship trophy on a plinth" data-gallery="single-trophy" data-full="images/trophy.jpg" tabindex="0" role="button" data-caption-key="cap.trophy">
+            <figcaption class="caption-bar" data-i18n="cap.trophy">The World Championship trophy</figcaption>
+        </figure>
+        <div class="trophy-text">
+            <h2 data-i18n="legends.title">Championship Legends</h2>
+            <div class="mb-3 d-flex flex-wrap gap-2">
+                <button id="filter-multi" type="button" class="btn btn-outline-danger btn-sm" data-i18n="filter.multi">Filter Multi-Champions</button>
+                <button id="reset-drivers-filter" type="button" class="btn btn-outline-secondary btn-sm" data-i18n="filter.allDrivers">Show All Drivers</button>
+            </div>
+            <ul id="dynamic-drivers-list" class="list-group"></ul>
+        </div>
+    </section>
+
+    <section class="cards-section">
+        <h2 data-i18n="profiles.title">Featured Profiles</h2>
+        <div class="row g-3 g-lg-4">
+            <div class="col-md-6 searchable-item">
+                <div class="card h-100 p-3">
+                    <h3 class="card-title accent-text fs-5 highlightable">Lewis Hamilton</h3>
+                    <p class="card-text highlightable">103 Race Wins, 7 World Championship Titles. One of the greatest drivers in motorsport history.</p>
+                    <div>
+                        <div class="read-more-content">
+                            <p class="card-text highlightable">Hamilton won his first title with McLaren in 2008 and six more with Mercedes between 2014 and 2020, before moving to Ferrari for 2025.</p>
+                        </div>
+                        <button type="button" class="btn btn-outline-danger btn-sm read-more-btn" data-i18n="readmore.more" aria-expanded="false">Read More</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 searchable-item">
+                <div class="card h-100 p-3">
+                    <h3 class="card-title accent-text fs-5 highlightable">Max Verstappen</h3>
+                    <p class="card-text highlightable">4-time consecutive World Champion (2021-2024) known for dominant race pace and aggressive overtaking.</p>
+                    <div>
+                        <div class="read-more-content">
+                            <p class="card-text highlightable">Verstappen became the youngest race winner in F1 history at the 2016 Spanish Grand Prix, aged 18.</p>
+                        </div>
+                        <button type="button" class="btn btn-outline-danger btn-sm read-more-btn" data-i18n="readmore.more" aria-expanded="false">Read More</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    </main>
+
+    <footer class="text-center py-4 px-3">
+        <ul class="footer-links list-unstyled d-flex flex-wrap justify-content-center gap-3 mb-3">
+            <li><a href="index.html" data-i18n="nav.home">Home</a></li>
+            <li><a href="teams.html" data-i18n="nav.teams">Teams</a></li>
+            <li><a href="drivers.html" data-i18n="nav.drivers">Drivers</a></li>
+            <li><a href="races.html" data-i18n="nav.races">Races</a></li>
+            <li><a href="gallery.html" data-i18n="nav.gallery">Gallery</a></li>
+            <li><a href="about.html" data-i18n="nav.about">About</a></li>
+            <li><a href="contact.html" data-i18n="nav.contact">Contact</a></li>
+        </ul>
+        <p class="mb-1">&copy; 2026 F1 Educational Portal. All rights reserved. | Developers: <strong>Anuar Tursynbekov</strong> &amp; <strong>Zhanaiym Sadyk</strong></p>
+        <p class="small mb-1">Race data: <a href="https://github.com/jolpica/jolpica-f1" target="_blank" rel="noopener">Jolpica F1 API</a></p>
+        <p id="live-clock" class="small mb-0 fw-bold"></p>
+    </footer>
+</div>
+
+<!-- Popup subscription form (validated with JavaScript, not HTML attributes) -->
+<div id="popup-modal" class="popup-overlay" aria-hidden="true">
+    <div class="popup-content p-4" role="dialog" aria-modal="true" aria-labelledby="popup-title">
+        <button id="close-popup-btn" type="button" class="close-btn" aria-label="Close">&times;</button>
+        <h2 id="popup-title" class="h4 accent-text mb-3" data-i18n="popup.title">Join F1 Newsletter</h2>
+        <p data-i18n="popup.text">Get the latest racing updates directly to your inbox.</p>
+        <form id="subscribe-form" novalidate>
+            <div class="form-field mb-3">
+                <label for="subscribe-email" class="visually-hidden">Email address</label>
+                <input type="text" inputmode="email" id="subscribe-email" class="form-control" data-validate="email" placeholder="Enter your email address" data-i18n-placeholder="popup.placeholder" autocomplete="email">
+                <div class="field-error" role="alert"></div>
+            </div>
+            <button type="submit" class="btn btn-danger w-100 fw-bold" data-i18n="popup.btn">Subscribe Now</button>
+        </form>
+    </div>
+</div>
+
+<!-- Image lightbox -->
+<div id="lightbox" class="lightbox" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Photo viewer">
+    <button type="button" class="lb-btn lb-close" aria-label="Close">&times;</button>
+    <button type="button" class="lb-btn lb-prev" aria-label="Previous photo">&#10094;</button>
+    <figure class="lb-figure">
+        <img id="lb-img" alt="">
+        <figcaption id="lb-caption"></figcaption>
+    </figure>
+    <button type="button" class="lb-btn lb-next" aria-label="Next photo">&#10095;</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
